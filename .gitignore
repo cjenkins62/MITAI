@@ -1,0 +1,22 @@
+# Python
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Environment and secrets
+.env
+.env.*
+
+# Tooling caches
+.matplotlib/
+.DS_Store
+
+# Generated notebook outputs
+Week 1/output/
+
+# Saved platform pages (not portfolio content)
+Week 1/Great Learning.html
+Week 1/Great Learning_files/
