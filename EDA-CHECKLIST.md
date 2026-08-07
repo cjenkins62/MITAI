@@ -15,12 +15,14 @@ Use this at the start of every new dataset or portfolio project.
 | **3. Data profiling** | Shape, types, nulls, distributions | What does the raw data actually look like? Does it match the data dictionary? |
 | **4. Analytical dataset construction** | Clean, join, and engineer the analysis-ready dataset | What cleaned table do we need — and what rules got us there? |
 | **5. Domain calibration** | Sanity-check with domain knowledge and KPI ranges | Do these numbers and patterns make real-world sense? |
-| **6. Descriptive analysis** | Summarize, visualize, group | What does the data show — charts, tables, segments? |
+| **6. Descriptive analysis** | Univariate first, then bivariate and segmented views | What does each column look like — then how do variables relate? |
 | **7. Inferential statistics** | Test hypotheses with rigor | Are observed differences statistically meaningful? |
 | **8. Causal reasoning** | Ask *why*, not just *what* | What might explain the pattern? What can't we claim? |
 | **9. Synthesis** | Weave findings into a narrative tied to KPIs | So what? Did we learn anything that could move the metric? |
 
 > **Note:** Steps 7–8 are optional for pure exploratory portfolio work. Use them when the business question requires formal hypothesis testing or causal claims.
+>
+> **Descriptive analysis order:** univariate (one column at a time on cleaned data) → bivariate/segmented (relationships and KPI breakdowns) → correlation and cross-slice comparisons.
 
 ---
 
@@ -37,7 +39,8 @@ Use AI (Chat) and code where each is strongest. You verify everything code produ
 | **Data cleaning** | Choosing drop / impute / flag strategies per column | Types, duplicates, invalid values, joins; log rows in/out |
 | **Analytical dataset construction** | Reviewing join and feature logic | Building the cleaned dataset (SQL / Python) |
 | **Domain calibration** | Calibrating domain expectations; judging KPI plausibility | Validating ranges and counts against raw data |
-| **Descriptive analysis** | Choosing chart types for the question | Running statistics, KPI aggregations, groupbys, and plots |
+| **Descriptive analysis (univariate)** | Choosing charts for single-column distributions | Histograms, `describe()`, `value_counts()`, KPI volume over time |
+| **Descriptive analysis (bivariate+)** | Choosing comparisons for the business question | Box plots, heatmaps, groupbys, correlation, cross-slice plots |
 | **Inferential statistics** | Interpreting statistical results | Executing statistical tests |
 | **Causal reasoning** | Causal and counterfactual reasoning | Validating causal claims with data |
 | **Synthesis** | Synthesizing findings into narrative; linking insights to KPIs | Supporting claims with reproducible outputs |
@@ -59,7 +62,8 @@ The [detailed phases](#detailed-phases-notebook-workflow) below are the executab
 | Data cleaning | Phase 2 |
 | Analytical dataset construction | Phases 2–3 (clean, then feature-engineer) |
 | Domain calibration | Phase 2 cleaning log and calibration checks |
-| Descriptive analysis | Phases 4–7 (prioritize primary KPIs) |
+| Descriptive analysis (univariate) | Phase 4 — one column at a time on cleaned data |
+| Descriptive analysis (bivariate+) | Phases 5–7 — segmented views, correlation, cross-slice KPIs |
 | Inferential statistics | _Add when testing formal hypotheses_ |
 | Causal reasoning | _Add when explaining why, not just what_ |
 | Synthesis | Phase 8 (KPI impact and recommendations) |
@@ -232,6 +236,8 @@ Derive features that match the problem **before** plotting or modeling. **Add ea
 
 ### Phase 4 — Univariate exploration
 
+Explore **one variable at a time** on the cleaned `eda` dataset. This is deeper than [Phase 1 profiling](#phase-1--setup-and-load) (which runs on raw data to validate the dictionary).
+
 #### Numeric columns
 
 - [ ] Histograms / KDE
@@ -328,8 +334,8 @@ Copy this structure into a new notebook:
 ## 1. Load and inspect
 ## 2. Data cleaning (context-first)
 ## 3. Feature extraction (domain logic)
-## 4. Distributions (numeric + categorical)
-## 5. Segmented comparisons (box plots, groupby)
+## 4. Univariate exploration (one column at a time)
+## 5. Bivariate / segmented comparisons (box plots, groupby)
 ## 6. Correlation heatmap
 ## 7. Time / trend analysis
 ## 8. Cross-slice comparison (optional)
@@ -344,7 +350,8 @@ Copy this structure into a new notebook:
 
 | Stays the same | Changes per project |
 |----------------|---------------------|
-| Process: frame → document → hypothesize → profile → clean → build → explore → synthesize | Business context, KPIs, hypotheses, and data dictionary |
+| Process: frame → document → hypothesize → profile → clean → build → univariate → bivariate → synthesize | Business context, KPIs, hypotheses, and data dictionary |
+| Univariate before bivariate | Which columns and segments matter for KPIs |
 | Data dictionary before profiling | Column definitions, cleaning rules, join keys, KPI linkage |
 | Context-first cleaning (not blind imputation) | Per-column drop / impute / flag decisions |
 | Chat for thinking; code for execution | Which plots and KPIs answer *your* question |
