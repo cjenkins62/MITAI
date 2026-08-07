@@ -6,7 +6,65 @@ Use this at the start of every new dataset or portfolio project.
 
 ---
 
-## Phase 0 — Frame the project (before code)
+## The EDA process (overview)
+
+| Step | Focus | Question to answer |
+|------|-------|--------------------|
+| **1. Problem framing** | Define the question and scope | What decision or insight are we after? |
+| **2. Hypothesis generation** | Brainstorm what might be true | What patterns do we expect before looking at data? |
+| **3. Data profiling** | Shape, types, nulls, distributions | What does the raw data actually look like? |
+| **4. Analytical dataset construction** | Build the analysis-ready dataset | What cleaned, joined, and engineered table do we need? |
+| **5. Domain calibration** | Sanity-check with domain knowledge | Do these numbers and patterns make real-world sense? |
+| **6. Descriptive analysis** | Summarize, visualize, group | What does the data show — charts, tables, segments? |
+| **7. Inferential statistics** | Test hypotheses with rigor | Are observed differences statistically meaningful? |
+| **8. Causal reasoning** | Ask *why*, not just *what* | What might explain the pattern? What can't we claim? |
+| **9. Synthesis** | Weave findings into a narrative | So what? What should we do next? |
+
+> **Note:** Steps 7–8 are optional for pure exploratory portfolio work. Use them when the business question requires formal hypothesis testing or causal claims.
+
+---
+
+## Chat vs. code
+
+Use AI (Chat) and code where each is strongest. You verify everything code produces.
+
+| Step | Use Chat for | Use code for |
+|------|--------------|--------------|
+| **Problem framing** | Framing ambiguous problems | — |
+| **Hypothesis generation** | Generating hypotheses creatively | — |
+| **Data profiling** | Interpreting odd patterns you find | Shape, types, nulls, distributions |
+| **Analytical dataset construction** | Reviewing join/feature logic | Building the dataset (SQL / Python) |
+| **Domain calibration** | Calibrating domain expectations | Validating ranges and counts against raw data |
+| **Descriptive analysis** | Choosing chart types for the question | Running statistics, groupbys, and plots |
+| **Inferential statistics** | Interpreting statistical results | Executing statistical tests |
+| **Causal reasoning** | Causal and counterfactual reasoning | Validating causal claims with data |
+| **Synthesis** | Synthesizing findings into narrative | Supporting claims with reproducible outputs |
+
+**Code-heavy work:** iterative database-connected analysis, reusable `load_and_clean()` functions, and anything that must be exact (aggregations, column names, joins).
+
+---
+
+## How the overview maps to notebook phases
+
+The [detailed phases](#detailed-phases-notebook-workflow) below are the executable checklist for steps 3–6 and 9:
+
+| Process step | Notebook phase(s) |
+|--------------|-------------------|
+| Problem framing | Phase 0 |
+| Hypothesis generation | _Write 2–3 hypotheses in notebook header before profiling_ |
+| Data profiling | Phases 1–2 |
+| Analytical dataset construction | Phases 2–3 |
+| Domain calibration | Phase 2 imputation guide; sanity checks throughout |
+| Descriptive analysis | Phases 4–7 |
+| Inferential statistics | _Add when testing formal hypotheses_ |
+| Causal reasoning | _Add when explaining why, not just what_ |
+| Synthesis | Phase 8 |
+
+---
+
+## Detailed phases (notebook workflow)
+
+### Phase 0 — Frame the project (before code)
 
 Write this at the top of every notebook or README.
 
@@ -17,10 +75,11 @@ Write this at the top of every notebook or README.
 | **Key entities** | Trip, base, timestamp | _Row = customer? transaction? sensor reading?_ |
 | **Risk of bad cleaning** | Fake GPS coords break maps | _What would a wrong imputation cost?_ |
 | **EDA goals** (3–5 bullets) | Descriptive stats, missing values, temporal patterns | _What you need to learn before modeling_ |
+| **Hypotheses** (2–3 bullets) | Evening rush peaks; weekday > weekend | _What you expect before plotting_ |
 
 ---
 
-## Phase 1 — Setup and load
+### Phase 1 — Setup and load
 
 **Always do:**
 
@@ -40,14 +99,14 @@ Write this at the top of every notebook or README.
 
 ---
 
-## Phase 2 — Missing values (context-first)
+### Phase 2 — Missing values (context-first)
 
 **Always do:**
 
 1. Count missing per column (`isna().sum()` + percentage)
 2. For each column with gaps, decide: **drop**, **impute**, or **flag**
 
-### Imputation decision guide
+#### Imputation decision guide
 
 Ask for every column: *What does this data actually look like, and what imputation strategy fits the business context?*
 
@@ -64,7 +123,7 @@ Ask for every column: *What does this data actually look like, and what imputati
 
 ---
 
-## Phase 3 — Domain feature extraction
+### Phase 3 — Domain feature extraction
 
 Derive features that match the problem **before** plotting or modeling.
 
@@ -78,26 +137,26 @@ Derive features that match the problem **before** plotting or modeling.
 
 ---
 
-## Phase 4 — Univariate exploration
+### Phase 4 — Univariate exploration
 
-### Numeric columns
+#### Numeric columns
 
 - [ ] Histograms / KDE
 - [ ] Review `describe()` — do not trust summary stats alone
 - [ ] Note outliers and impossible values
 
-### Categorical columns
+#### Categorical columns
 
 - [ ] `value_counts()` for top categories
 - [ ] Check cardinality (how many unique values?)
 
-### Time
+#### Time
 
 - [ ] Daily or weekly line plot of volume or target
 
 ---
 
-## Phase 5 — Bivariate / segmented views
+### Phase 5 — Bivariate / segmented views
 
 Pick 2–3 comparisons that directly answer the business question.
 
@@ -113,7 +172,7 @@ Pick 2–3 comparisons that directly answer the business question.
 
 ---
 
-## Phase 6 — Correlation / redundancy check
+### Phase 6 — Correlation / redundancy check
 
 For numeric features:
 
@@ -124,7 +183,7 @@ A "nothing redundant here" result is still useful — it tells you which feature
 
 ---
 
-## Phase 7 — Compare across slices (if applicable)
+### Phase 7 — Compare across slices (if applicable)
 
 When you have multiple files, regions, or time periods:
 
@@ -137,7 +196,7 @@ This catches **growth, seasonality, and data drift** that single-file EDA misses
 
 ---
 
-## Phase 8 — Document takeaways
+### Phase 8 — Document takeaways (synthesis)
 
 End every EDA with five bullets:
 
@@ -146,6 +205,11 @@ End every EDA with five bullets:
 3. **Cleaning decisions** — what you did and why
 4. **Feature ideas** — what to engineer for modeling
 5. **Open questions** — what needs domain expert input
+
+When steps 7–8 of [the EDA process](#the-eda-process-overview) apply, also include:
+
+6. **Hypothesis results** — what was supported or rejected
+7. **Causal claims** — what you can and cannot conclude
 
 ---
 
@@ -158,6 +222,7 @@ Copy this structure into a new notebook:
 
 **Dataset:** [source + link]
 **Business question:** [one sentence]
+**Hypotheses:** [2–3 bullets]
 **EDA goals:** [3–5 bullets]
 
 ## 1. Load and inspect
@@ -168,7 +233,9 @@ Copy this structure into a new notebook:
 ## 6. Correlation heatmap
 ## 7. Time / trend analysis
 ## 8. Cross-slice comparison (optional)
-## 9. Key takeaways + next steps
+## 9. Inferential tests (optional)
+## 10. Causal reasoning (optional)
+## 11. Key takeaways + next steps
 ```
 
 ---
@@ -177,10 +244,11 @@ Copy this structure into a new notebook:
 
 | Stays the same | Changes per project |
 |----------------|---------------------|
-| Load → inspect → clean → explore → document | Column names, imputation rules |
-| Context-before-imputation mindset | Which plots answer *your* question |
+| Process: frame → hypothesize → profile → build → explore → synthesize | Business question and hypotheses |
+| Context-before-imputation mindset | Column names, imputation rules |
+| Chat for thinking; code for execution | Which plots answer *your* question |
 | Reusable load/clean function | Domain features (time vs geo vs text) |
-| Takeaways section | Comparison slices (months, regions, products) |
+| Takeaways / synthesis section | Comparison slices (months, regions, products) |
 
 ---
 
