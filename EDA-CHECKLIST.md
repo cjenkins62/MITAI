@@ -13,7 +13,7 @@ Use this at the start of every new dataset or portfolio project.
 | **1. Problem framing** | Define the question, scope, context, and KPIs | What decision are we after, and how will we measure success? |
 | **2. Hypothesis generation** | Brainstorm what might be true | What patterns do we expect before looking at data? |
 | **3. Data profiling** | Shape, types, nulls, distributions | What does the raw data actually look like? Does it match the data dictionary? |
-| **4. Analytical dataset construction** | Build the analysis-ready dataset | What cleaned, joined, and engineered table do we need? |
+| **4. Analytical dataset construction** | Clean, join, and engineer the analysis-ready dataset | What cleaned table do we need — and what rules got us there? |
 | **5. Domain calibration** | Sanity-check with domain knowledge and KPI ranges | Do these numbers and patterns make real-world sense? |
 | **6. Descriptive analysis** | Summarize, visualize, group | What does the data show — charts, tables, segments? |
 | **7. Inferential statistics** | Test hypotheses with rigor | Are observed differences statistically meaningful? |
@@ -34,7 +34,8 @@ Use AI (Chat) and code where each is strongest. You verify everything code produ
 | **Hypothesis generation** | Generating hypotheses creatively | — |
 | **Data dictionary** | Drafting field definitions from source docs | Validating columns, dtypes, and row counts against raw files |
 | **Data profiling** | Interpreting odd patterns you find | Shape, types, nulls, distributions |
-| **Analytical dataset construction** | Reviewing join/feature logic | Building the dataset (SQL / Python) |
+| **Data cleaning** | Choosing drop / impute / flag strategies per column | Types, duplicates, invalid values, joins; log rows in/out |
+| **Analytical dataset construction** | Reviewing join and feature logic | Building the cleaned dataset (SQL / Python) |
 | **Domain calibration** | Calibrating domain expectations; judging KPI plausibility | Validating ranges and counts against raw data |
 | **Descriptive analysis** | Choosing chart types for the question | Running statistics, KPI aggregations, groupbys, and plots |
 | **Inferential statistics** | Interpreting statistical results | Executing statistical tests |
@@ -54,9 +55,10 @@ The [detailed phases](#detailed-phases-notebook-workflow) below are the executab
 | Problem framing | Phase 0 (business context, KPIs) |
 | Hypothesis generation | _Write 2–3 hypotheses in notebook header before profiling_ |
 | Data dictionary | Phase 0–1 (`data/data_dictionary.md`) |
-| Data profiling | Phases 1–2 |
-| Analytical dataset construction | Phases 2–3 |
-| Domain calibration | Phase 2 imputation guide; KPI range checks; sanity checks throughout |
+| Data profiling | Phase 1 |
+| Data cleaning | Phase 2 |
+| Analytical dataset construction | Phases 2–3 (clean, then feature-engineer) |
+| Domain calibration | Phase 2 cleaning log and calibration checks |
 | Descriptive analysis | Phases 4–7 (prioritize primary KPIs) |
 | Inferential statistics | _Add when testing formal hypotheses_ |
 | Causal reasoning | _Add when explaining why, not just what_ |
@@ -101,7 +103,8 @@ If the source already publishes a dictionary, link it — then add your **rename
 |---------|-----------------|
 | **Source & grain** | URL, date range, one row = what |
 | **Raw columns** | Raw name, analysis name, type, description, valid range |
-| **Derived features** | Engineered columns added during cleaning (Phase 3) |
+| **Derived features** | Engineered columns added in Phase 3 |
+| **Cleaning rules** | Per-column actions: drop, impute, flag, parse, filter — with row counts |
 | **KPI linkage** | Which columns feed primary and secondary KPIs |
 | **Join keys** | For multi-table datasets — keys, cardinality, known orphans |
 | **Data quality notes** | Known missingness, outliers, parsing quirks |
@@ -137,16 +140,27 @@ If the source already publishes a dictionary, link it — then add your **rename
 
 ---
 
-### Phase 2 — Missing values (context-first)
+### Phase 2 — Data cleaning (context-first)
 
-**Always do:**
+Work from a copy — keep raw `df`, build cleaned `eda`. Profile first (Phase 1), then clean. **Document every rule in the data dictionary cleaning rules section.**
+
+Ask for every column: *What does this data actually look like, and what strategy fits the business context?*
+
+#### Quick checklist
+
+- [ ] **Missing values:** drop / impute / flag (per column, with reason)
+- [ ] **Types and parsing:** dates, numerics stored as strings, categoricals
+- [ ] **Duplicates and grain:** exact dupes and key-based dupes; confirm one row = one entity
+- [ ] **Invalid values:** domain rules applied (ranges, codes, sign checks)
+- [ ] **Outliers:** policy documented — drop, cap, flag, or keep with justification
+- [ ] **Joins** (if multi-table): orphan rows and duplicate keys handled
+- [ ] **Cleaning log:** rows before → after each major rule
+- [ ] **Dictionary updated** with cleaning rules and row counts
+
+#### 2a — Missing values
 
 1. Count missing per column (`isna().sum()` + percentage)
 2. For each column with gaps, decide: **drop**, **impute**, or **flag**
-
-#### Imputation decision guide
-
-Ask for every column: *What does this data actually look like, and what imputation strategy fits the business context?*
 
 | Column type | Usually | Rarely |
 |-------------|---------|--------|
@@ -157,7 +171,39 @@ Ask for every column: *What does this data actually look like, and what imputati
 | **Optional survey fields** | Treat "missing" as its own category | Mean / median |
 | **Sensor / time-series gaps** | Interpolate, forward-fill, or segment | Global mean |
 
-**Always log:** rows before and after cleaning, what you dropped, and why.
+#### 2b — Types and parsing
+
+- [ ] Parse datetimes; coerce invalid to `NaT` and handle explicitly
+- [ ] Convert numeric strings; flag coercion failures
+- [ ] Normalize categoricals (trim whitespace, consistent casing)
+- [ ] Fix encoding issues in text columns
+
+#### 2c — Duplicates and grain
+
+- [ ] Check exact duplicate rows (`duplicated()`)
+- [ ] Check duplicate business keys (if grain = one row per entity)
+- [ ] Confirm row-level grain matches the data dictionary
+
+#### 2d — Invalid values and outliers
+
+- [ ] Apply domain range filters (e.g. lat/lon bounds, non-negative amounts)
+- [ ] Decide outlier policy before deleting — document keep/drop/cap/flag
+- [ ] Never apply a global rule without checking business impact on KPIs
+
+#### 2e — Joins (multi-table only)
+
+- [ ] Validate join keys: cardinality, null keys, orphan rows
+- [ ] Log rows gained/lost after each join
+- [ ] Resolve duplicate column names from merges
+
+#### Cleaning log (always)
+
+Record after each major rule:
+
+```
+Rule: drop rows with null lat/lon
+Rows before: 564,516 → after: 564,516 (0 dropped)
+```
 
 #### Domain calibration checks
 
@@ -280,7 +326,7 @@ Copy this structure into a new notebook:
 **EDA goals:** [3–5 bullets]
 
 ## 1. Load and inspect
-## 2. Missing values (context-aware cleaning)
+## 2. Data cleaning (context-first)
 ## 3. Feature extraction (domain logic)
 ## 4. Distributions (numeric + categorical)
 ## 5. Segmented comparisons (box plots, groupby)
@@ -298,9 +344,9 @@ Copy this structure into a new notebook:
 
 | Stays the same | Changes per project |
 |----------------|---------------------|
-| Process: frame → document → hypothesize → profile → build → explore → synthesize | Business context, KPIs, hypotheses, and data dictionary |
-| Data dictionary before profiling | Column definitions, join keys, KPI linkage |
-| Context-before-imputation mindset | Column names, imputation rules |
+| Process: frame → document → hypothesize → profile → clean → build → explore → synthesize | Business context, KPIs, hypotheses, and data dictionary |
+| Data dictionary before profiling | Column definitions, cleaning rules, join keys, KPI linkage |
+| Context-first cleaning (not blind imputation) | Per-column drop / impute / flag decisions |
 | Chat for thinking; code for execution | Which plots and KPIs answer *your* question |
 | Reusable load/clean function | Domain features (time vs geo vs text) |
 | Takeaways / synthesis section | Comparison slices (months, regions, products) |

@@ -42,6 +42,16 @@
 
 ---
 
+## Cleaning rules
+
+| Column | Rule | Rows before → after | Reason |
+|--------|------|---------------------|--------|
+| `lat`, `lon` | Drop rows with null coordinates | 564,516 → 564,516 | Never impute fake GPS locations |
+| `pickup_time` | Parse with `errors="coerce"`; drop `NaT` | 564,516 → 564,516 | Invalid timestamps unusable for temporal KPIs |
+| `lat`, `lon` (outliers) | Investigate but keep in EDA | — | Some pickups outside core NYC; flag before mapping |
+
+---
+
 ## Data quality notes
 
 - **April 2014:** No missing values in raw file; 564,516 rows.
