@@ -15,14 +15,14 @@ Use this at the start of every new dataset or portfolio project.
 | **3. Data profiling** | Shape, types, nulls, distributions | What does the raw data actually look like? Does it match the data dictionary? |
 | **4. Analytical dataset construction** | Clean, join, and engineer the analysis-ready dataset | What cleaned table do we need — and what rules got us there? |
 | **5. Domain calibration** | Sanity-check with domain knowledge and KPI ranges | Do these numbers and patterns make real-world sense? |
-| **6. Descriptive analysis** | Univariate first, then bivariate and segmented views | What does each column look like — then how do variables relate? |
+| **6. Descriptive analysis** | Univariate → bivariate → multivariate | What does each column look like — then how do variables relate alone, in pairs, and together? |
 | **7. Inferential statistics** | Test hypotheses with rigor | Are observed differences statistically meaningful? |
 | **8. Causal reasoning** | Ask *why*, not just *what* | What might explain the pattern? What can't we claim? |
 | **9. Synthesis** | Weave findings into a narrative tied to KPIs | So what? Did we learn anything that could move the metric? |
 
 > **Note:** Steps 7–8 are optional for pure exploratory portfolio work. Use them when the business question requires formal hypothesis testing or causal claims.
 >
-> **Descriptive analysis order:** univariate (one column at a time on cleaned data) → bivariate/segmented (relationships and KPI breakdowns) → correlation and cross-slice comparisons.
+> **Descriptive analysis order:** univariate (Phase 4) → bivariate (Phase 5) → multivariate (Phases 6–7: correlation matrices, multi-way heatmaps, cross-slice KPI comparisons).
 
 ---
 
@@ -40,7 +40,8 @@ Use AI (Chat) and code where each is strongest. You verify everything code produ
 | **Analytical dataset construction** | Reviewing join and feature logic | Building the cleaned dataset (SQL / Python) |
 | **Domain calibration** | Calibrating domain expectations; judging KPI plausibility | Validating ranges and counts against raw data |
 | **Descriptive analysis (univariate)** | Choosing charts for single-column distributions | Histograms, `describe()`, `value_counts()`, KPI volume over time |
-| **Descriptive analysis (bivariate+)** | Choosing comparisons for the business question | Box plots, heatmaps, groupbys, correlation, cross-slice plots |
+| **Descriptive analysis (bivariate)** | Choosing two-variable comparisons for the business question | Box plots, scatter, 2-D heatmaps, segmented groupbys |
+| **Descriptive analysis (multivariate)** | Spotting patterns across many variables at once | Correlation heatmaps, multi-way pivots, cross-slice overlay plots |
 | **Inferential statistics** | Interpreting statistical results | Executing statistical tests |
 | **Causal reasoning** | Causal and counterfactual reasoning | Validating causal claims with data |
 | **Synthesis** | Synthesizing findings into narrative; linking insights to KPIs | Supporting claims with reproducible outputs |
@@ -63,10 +64,11 @@ The [detailed phases](#detailed-phases-notebook-workflow) below are the executab
 | Analytical dataset construction | Phases 2–3 (clean, then feature-engineer) |
 | Domain calibration | Phase 2 cleaning log and calibration checks |
 | Descriptive analysis (univariate) | Phase 4 — one column at a time on cleaned data |
-| Descriptive analysis (bivariate+) | Phases 5–7 — segmented views, correlation, cross-slice KPIs |
-| Inferential statistics | _Add when testing formal hypotheses_ |
-| Causal reasoning | _Add when explaining why, not just what_ |
-| Synthesis | Phase 8 (KPI impact and recommendations) |
+| Descriptive analysis (bivariate) | Phase 5 — two variables (category × numeric, time × metric) |
+| Descriptive analysis (multivariate) | Phases 6–7 — correlation across numerics, multi-way heatmaps, cross-slice KPIs |
+| Inferential statistics | Phase 8b — hypothesis statistical testing (optional) |
+| Causal reasoning | _Add when explaining why, not just what; after or alongside Phase 8b_ |
+| Synthesis | Phase 8 (KPI impact, hypothesis results, recommendations) |
 
 ---
 
@@ -271,20 +273,23 @@ Pick 2–3 comparisons that directly answer the business question and illuminate
 
 ---
 
-### Phase 6 — Correlation / redundancy check
+### Phase 6 — Multivariate checks (correlation / redundancy)
 
-For numeric features:
+Examine **many numeric variables at once** — pairwise relationships and redundancy before modeling.
 
 - [ ] Correlation heatmap
 - [ ] Flag pairs with \|r\| > ~0.7–0.8 (multicollinearity risk)
+- [ ] Optional: pairplot or scatter matrix when you have ≤5 numeric features
 
 A "nothing redundant here" result is still useful — it tells you which features are safe to keep.
 
+> PCA, clustering, and formal multivariate modeling belong in a modeling phase — not required for portfolio EDA.
+
 ---
 
-### Phase 7 — Compare across slices (if applicable)
+### Phase 7 — Multivariate comparisons across slices (if applicable)
 
-When you have multiple files, regions, or time periods:
+When you have multiple files, regions, or time periods — **three or more dimensions** (e.g. hour × month × volume):
 
 1. Write a reusable `load_and_clean()` function
 2. Concatenate or compare side by side
@@ -292,6 +297,48 @@ When you have multiple files, regions, or time periods:
 4. Overlay plots (e.g. hourly KPI pattern by month)
 
 This catches **growth, seasonality, and data drift** — and shows whether KPIs are improving or shifting across slices.
+
+---
+
+### Phase 8b — Hypothesis statistical testing (optional)
+
+Use when [Step 7 — Inferential statistics](#the-eda-process-overview) applies: you need to test whether descriptive patterns are **statistically meaningful**, not just visible in charts.
+
+Skip for pure exploratory portfolio EDA (e.g. Week 1 Uber notebook). Use when the business question or course assignment requires formal testing.
+
+#### Before testing
+
+For each [Phase 0 hypothesis](#phase-0--frame-the-project-before-code):
+
+- [ ] State **H₀** (null) and **H₁** (alternative) in plain language
+- [ ] Identify the **test variable(s)** and **comparison groups**
+- [ ] Confirm sample size is adequate after [Phase 2 cleaning](#phase-2--data-cleaning-context-first)
+
+#### Test selection guide
+
+| Question type | Example | Common test |
+|---------------|---------|-------------|
+| Two group means differ | Weekday vs weekend pickup counts | Independent t-test (or Mann-Whitney if non-normal) |
+| Paired before/after | KPI before vs after a change | Paired t-test |
+| More than two group means | Pickups across 5 TLC bases | One-way ANOVA (+ post-hoc if significant) |
+| Category distribution differs | Observed vs expected base mix | Chi-square goodness of fit |
+| Two categorical variables associated | Base × day-of-week | Chi-square test of independence |
+| Two numeric variables related | Lat vs lon (linear relationship) | Pearson or Spearman correlation |
+
+#### Checklist
+
+- [ ] Check assumptions (normality, independence, expected cell counts for chi-square)
+- [ ] Run test in code (`scipy.stats`, `statsmodels`)
+- [ ] Report **test statistic**, **p-value**, and **effect size** (or confidence interval) where applicable
+- [ ] Distinguish **statistical significance** from **practical significance** (does it matter for KPIs?)
+- [ ] Record result: **supported**, **rejected**, or **inconclusive**
+
+#### Chat vs. code
+
+- **Chat:** choose the right test, interpret p-values, explain limitations
+- **Code:** execute the test on the cleaned `eda` dataset — verify group sizes and column names
+
+> Formal causal claims require more than a significant p-value — see Step 8 (Causal reasoning).
 
 ---
 
@@ -307,9 +354,9 @@ End every EDA with five bullets:
 6. **Recommendations** — what a stakeholder could do next based on KPI insights
 7. **Open questions** — what needs domain expert input
 
-When steps 7–8 of [the EDA process](#the-eda-process-overview) apply, also include:
+When steps 7–8 of [the EDA process](#the-eda-process-overview) apply, also include (from [Phase 8b](#phase-8b--hypothesis-statistical-testing-optional) if run):
 
-8. **Hypothesis results** — what was supported or rejected
+8. **Hypothesis results** — H₀/H₁, test used, p-value, supported / rejected / inconclusive
 9. **Causal claims** — what you can and cannot conclude
 
 ---
@@ -335,13 +382,12 @@ Copy this structure into a new notebook:
 ## 2. Data cleaning (context-first)
 ## 3. Feature extraction (domain logic)
 ## 4. Univariate exploration (one column at a time)
-## 5. Bivariate / segmented comparisons (box plots, groupby)
-## 6. Correlation heatmap
-## 7. Time / trend analysis
-## 8. Cross-slice comparison (optional)
-## 9. Inferential tests (optional)
-## 10. Causal reasoning (optional)
-## 11. Key takeaways + next steps
+## 5. Bivariate comparisons (two variables)
+## 6. Multivariate checks (correlation heatmap)
+## 7. Multivariate cross-slice and trend comparison (optional)
+## 8. Hypothesis statistical testing (optional)
+## 9. Causal reasoning (optional)
+## 10. Key takeaways + next steps
 ```
 
 ---
@@ -350,13 +396,14 @@ Copy this structure into a new notebook:
 
 | Stays the same | Changes per project |
 |----------------|---------------------|
-| Process: frame → document → hypothesize → profile → clean → build → univariate → bivariate → synthesize | Business context, KPIs, hypotheses, and data dictionary |
-| Univariate before bivariate | Which columns and segments matter for KPIs |
+| Process: frame → document → hypothesize → profile → clean → build → univariate → bivariate → multivariate → synthesize | Business context, KPIs, hypotheses, and data dictionary |
+| Univariate → bivariate → multivariate | Which columns, pairs, and slices matter for KPIs |
 | Data dictionary before profiling | Column definitions, cleaning rules, join keys, KPI linkage |
 | Context-first cleaning (not blind imputation) | Per-column drop / impute / flag decisions |
 | Chat for thinking; code for execution | Which plots and KPIs answer *your* question |
 | Reusable load/clean function | Domain features (time vs geo vs text) |
-| Takeaways / synthesis section | Comparison slices (months, regions, products) |
+| Takeaways / synthesis section | Comparison slices; hypothesis test results when Phase 8b applies |
+| Hypothesis testing (optional) | H₀/H₁, test choice, and interpretation per Phase 0 hypothesis |
 
 ---
 
