@@ -3,3 +3,4 @@ numpy>=1.24
 matplotlib>=3.7
 seaborn>=0.13
 jupyter>=1.0
+fastjsonschema==2.19.1  # pin for Python 3.9 (2.22+ uses 3.10+ syntax)

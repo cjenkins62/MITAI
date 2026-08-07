@@ -10,6 +10,10 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## EDA workflow
+
+Use [`EDA-CHECKLIST.md`](EDA-CHECKLIST.md) as a reusable plan for every new dataset — load, context-aware cleaning, feature extraction, exploration, and documented takeaways.
+
 ## Projects
 
 ### Week 1 — Uber NYC Pickups EDA
