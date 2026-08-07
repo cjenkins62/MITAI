@@ -12,7 +12,7 @@ Use this at the start of every new dataset or portfolio project.
 |------|-------|--------------------|
 | **1. Problem framing** | Define the question, scope, context, and KPIs | What decision are we after, and how will we measure success? |
 | **2. Hypothesis generation** | Brainstorm what might be true | What patterns do we expect before looking at data? |
-| **3. Data profiling** | Shape, types, nulls, distributions | What does the raw data actually look like? |
+| **3. Data profiling** | Shape, types, nulls, distributions | What does the raw data actually look like? Does it match the data dictionary? |
 | **4. Analytical dataset construction** | Build the analysis-ready dataset | What cleaned, joined, and engineered table do we need? |
 | **5. Domain calibration** | Sanity-check with domain knowledge and KPI ranges | Do these numbers and patterns make real-world sense? |
 | **6. Descriptive analysis** | Summarize, visualize, group | What does the data show — charts, tables, segments? |
@@ -32,6 +32,7 @@ Use AI (Chat) and code where each is strongest. You verify everything code produ
 |------|--------------|--------------|
 | **Problem framing** | Framing ambiguous problems; naming actionable KPIs | — |
 | **Hypothesis generation** | Generating hypotheses creatively | — |
+| **Data dictionary** | Drafting field definitions from source docs | Validating columns, dtypes, and row counts against raw files |
 | **Data profiling** | Interpreting odd patterns you find | Shape, types, nulls, distributions |
 | **Analytical dataset construction** | Reviewing join/feature logic | Building the dataset (SQL / Python) |
 | **Domain calibration** | Calibrating domain expectations; judging KPI plausibility | Validating ranges and counts against raw data |
@@ -52,6 +53,7 @@ The [detailed phases](#detailed-phases-notebook-workflow) below are the executab
 |--------------|-------------------|
 | Problem framing | Phase 0 (business context, KPIs) |
 | Hypothesis generation | _Write 2–3 hypotheses in notebook header before profiling_ |
+| Data dictionary | Phase 0–1 (`data/data_dictionary.md`) |
 | Data profiling | Phases 1–2 |
 | Analytical dataset construction | Phases 2–3 |
 | Domain calibration | Phase 2 imputation guide; KPI range checks; sanity checks throughout |
@@ -85,23 +87,53 @@ Write this at the top of every notebook or README.
 
 ---
 
+### Phase 0b — Data dictionary (before profiling)
+
+Document the schema **after framing, before cleaning**. Store one file per project:
+
+```
+[data/]data_dictionary.md
+```
+
+If the source already publishes a dictionary, link it — then add your **renamed columns**, **derived features**, and **KPI linkage**.
+
+| Section | What to include |
+|---------|-----------------|
+| **Source & grain** | URL, date range, one row = what |
+| **Raw columns** | Raw name, analysis name, type, description, valid range |
+| **Derived features** | Engineered columns added during cleaning (Phase 3) |
+| **KPI linkage** | Which columns feed primary and secondary KPIs |
+| **Join keys** | For multi-table datasets — keys, cardinality, known orphans |
+| **Data quality notes** | Known missingness, outliers, parsing quirks |
+
+**When required:** multi-file datasets, unfamiliar external sources, portfolio repos.  
+**When optional:** trivial single-file data with obvious columns — link the source docs instead.
+
+**Example:** [`Week 1/data/data_dictionary.md`](Week%201/data/data_dictionary.md)
+
+---
+
 ### Phase 1 — Setup and load
 
 **Always do:**
 
-1. Standard imports and plot defaults
-2. Load raw data **without** cleaning
-3. Rename columns to clear, consistent names
-4. Print row count, `head()`, `info()`, `describe(include="all")`
+1. Create or link a [data dictionary](#phase-0b--data-dictionary-before-profiling)
+2. Standard imports and plot defaults
+3. Load raw data **without** cleaning
+4. Rename columns to clear, consistent names (match the dictionary)
+5. Print row count, `head()`, `info()`, `describe(include="all")`
 
 **Why:** Understand raw shape and dtypes before aggregating anything.
 
 **Checklist:**
 
+- [ ] Data dictionary exists or source dictionary is linked
+- [ ] Column names match the dictionary (raw → analysis names)
 - [ ] How many rows and columns?
 - [ ] Any duplicate or unnamed columns?
 - [ ] Are dtypes correct (e.g. dates stored as `object` vs `datetime`)?
 - [ ] Any obvious junk values in `head()`?
+- [ ] Do row counts and dtypes match dictionary expectations?
 
 ---
 
@@ -140,7 +172,7 @@ After cleaning, sanity-check results against business context and KPI expectatio
 
 ### Phase 3 — Domain feature extraction
 
-Derive features that match the problem **before** plotting or modeling.
+Derive features that match the problem **before** plotting or modeling. **Add each derived column to `data/data_dictionary.md`.**
 
 | Domain | Features to consider |
 |--------|---------------------|
@@ -238,6 +270,7 @@ Copy this structure into a new notebook:
 # [Project Name] — EDA
 
 **Dataset:** [source + link]
+**Data dictionary:** [data/data_dictionary.md]
 **Business context:** [industry, situation, constraints]
 **Stakeholder / decision:** [who acts on this]
 **Business question:** [one sentence]
@@ -265,7 +298,8 @@ Copy this structure into a new notebook:
 
 | Stays the same | Changes per project |
 |----------------|---------------------|
-| Process: frame → hypothesize → profile → build → explore → synthesize | Business context, KPIs, and hypotheses |
+| Process: frame → document → hypothesize → profile → build → explore → synthesize | Business context, KPIs, hypotheses, and data dictionary |
+| Data dictionary before profiling | Column definitions, join keys, KPI linkage |
 | Context-before-imputation mindset | Column names, imputation rules |
 | Chat for thinking; code for execution | Which plots and KPIs answer *your* question |
 | Reusable load/clean function | Domain features (time vs geo vs text) |
@@ -277,3 +311,4 @@ Copy this structure into a new notebook:
 
 - **Source notebook:** [`Week 1/uber_nyc_eda.ipynb`](Week%201/uber_nyc_eda.ipynb)
 - **Session notes:** [`Week 1/session-1-summary.md`](Week%201/session-1-summary.md)
+- **Example data dictionary:** [`Week 1/data/data_dictionary.md`](Week%201/data/data_dictionary.md)
