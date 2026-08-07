@@ -112,5 +112,5 @@ The session closes by noting Binomial’s practical utility despite its simplifi
 |--------------|-------------------|
 | Random variables & distributions | [`probability-lecture-summary.md`](probability-lecture-summary.md) |
 | Inferential statistics overview | [`statistical-inference-lecture-summary.md`](statistical-inference-lecture-summary.md) |
-| Binomial / Bernoulli in practice | [`Notebook_Inferential_Statistics.ipynb`](Notebook_Inferential_Statistics.ipynb) |
+| Binomial / Bernoulli in practice | [`Notebook_Inferential_Statistics.ipynb`](../Notebook_Inferential_Statistics.ipynb) |
 | Binary outcomes → future modeling | Logistic regression (upcoming) |

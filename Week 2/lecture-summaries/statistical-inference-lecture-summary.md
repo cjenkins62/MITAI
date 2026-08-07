@@ -94,6 +94,6 @@ The lecture closes by setting up **hypothesis testing** as the next step — a m
 
 ## Related Week 2 materials
 
-- [`Notebook_Inferential_Statistics.ipynb`](Notebook_Inferential_Statistics.ipynb)
-- [`Notebook_Hypothesis_Testing.ipynb`](Notebook_Hypothesis_Testing.ipynb)
+- [`Notebook_Inferential_Statistics.ipynb`](../Notebook_Inferential_Statistics.ipynb)
+- [`Notebook_Hypothesis_Testing.ipynb`](../Notebook_Hypothesis_Testing.ipynb)
 - [`Exploratory Data Analysis/`](Exploratory%20Data%20Analysis/) — streaming platform customer churn project

@@ -104,7 +104,7 @@ The Binomial is useful whenever outcomes are **binary**:
 | Binomial theory & assumptions | [`binomial-bernoulli-lecture-summary.md`](binomial-bernoulli-lecture-summary.md) |
 | PMF / discrete distributions | [`probability-lecture-summary.md`](probability-lecture-summary.md) |
 | Inferential statistics context | [`statistical-inference-lecture-summary.md`](statistical-inference-lecture-summary.md) |
-| Hands-on practice | [`Notebook_Inferential_Statistics.ipynb`](Notebook_Inferential_Statistics.ipynb) |
+| Hands-on practice | [`Notebook_Inferential_Statistics.ipynb`](../Notebook_Inferential_Statistics.ipynb) |
 
 ---
 

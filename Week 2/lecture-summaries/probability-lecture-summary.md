@@ -96,4 +96,4 @@ These distributions are building blocks for **simplifying data analysis** and **
 |--------------|-------------------|
 | Sample → population under uncertainty | [`statistical-inference-lecture-summary.md`](statistical-inference-lecture-summary.md) |
 | Distributions + probability | Hypothesis testing — [`EDA-CHECKLIST.md`](../EDA-CHECKLIST.md) Step 7, Phase 8b |
-| Normal / Binomial etc. | [`Notebook_Inferential_Statistics.ipynb`](Notebook_Inferential_Statistics.ipynb), [`Notebook_Hypothesis_Testing.ipynb`](Notebook_Hypothesis_Testing.ipynb) |
+| Normal / Binomial etc. | [`Notebook_Inferential_Statistics.ipynb`](../Notebook_Inferential_Statistics.ipynb), [`Notebook_Hypothesis_Testing.ipynb`](../Notebook_Hypothesis_Testing.ipynb) |
